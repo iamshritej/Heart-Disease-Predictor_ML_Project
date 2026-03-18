@@ -1,20 +1,17 @@
-import os
-import pickle
-import numpy as np
+from fastapi import FastAPI
+from pydantic import BaseModel
+from Backend.predict import predict_output
 
-# Get current file path
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app = FastAPI()
 
-# Correct paths
-model_path = os.path.join(BASE_DIR, "..", "model", "model.pkl")
-scaler_path = os.path.join(BASE_DIR, "..", "model", "scaler.pkl")
+class InputData(BaseModel):
+    data: list
 
-# Load model and scaler
-model = pickle.load(open(model_path, "rb"))
-scaler = pickle.load(open(scaler_path, "rb"))
+@app.get("/")
+def home():
+    return {"message": "Machine Output Prediction API Running"}
 
-def predict_output(data):
-    data = np.array(data).reshape(1, -1)
-    data = scaler.transform(data)
-    prediction = model.predict(data)
-    return float(prediction[0])
+@app.post("/predict")
+def predict(input_data: InputData):
+    result = predict_output(input_data.data)
+    return {"Predicted Parts Per Hour": result}

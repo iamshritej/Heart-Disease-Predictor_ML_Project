@@ -1,24 +1,28 @@
 import streamlit as st
 import requests
 
-st.title("Manufacturing Machine Output Prediction")
+st.title("ML Prediction App")
 
-st.write("Enter machine parameters")
+input1 = st.number_input("Enter value 1")
+input2 = st.number_input("Enter value 2")
+input3 = st.number_input("Enter value 3")
+input4 = st.number_input("Enter value 4")
 
-temp = st.number_input("Injection Temperature")
-pressure = st.number_input("Injection Pressure")
-cycle = st.number_input("Cycle Time")
-cooling = st.number_input("Cooling Time")
+if st.button("Predict"):
+    url = "https://capstone-project-1-0icy.onrender.com/predict"
 
-if st.button("Predict Output"):
+    data = {
+        "data": [input1, input2, input3, input4]
+    }
 
-    data = [temp, pressure, cycle, cooling]
+    try:
+        response = requests.post(url, json=data)  # ✅ IMPORTANT
 
-    response = requests.post(
-        "http://127.0.0.1:8000/predict",
-        json=data
-    )
+        if response.status_code == 200:
+            result = response.json()
+            st.success(f"Prediction: {result}")
+        else:
+            st.error(f"Error: {response.text}")
 
-    result = response.json()
-
-    st.success(result)
+    except:
+        st.error("Error connecting to API")
