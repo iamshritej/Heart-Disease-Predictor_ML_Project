@@ -2,18 +2,55 @@ import os
 import pickle
 import numpy as np
 
-# Get base path
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# -------------------------------
+# Load Model (SAFE PATH HANDLING)
+# -------------------------------
+current_dir = os.path.dirname(__file__)
 
-# Load model
-model_path = os.path.join(BASE_DIR, "..", "Model", "model.pkl")
-scaler_path = os.path.join(BASE_DIR, "..", "Model", "scaler.pkl")
+# Go to project root -> Model/model.pkl
+model_path = os.path.abspath(
+    os.path.join(current_dir, "..", "Model", "model.pkl")
+)
 
-model = pickle.load(open(model_path, "rb"))
-scaler = pickle.load(open(scaler_path, "rb"))
+# Check if file exists (prevents crash)
+if not os.path.exists(model_path):
+    raise FileNotFoundError(f"Model file not found at: {model_path}")
 
-def predict_output(data):
-    data = np.array(data).reshape(1, -1)
-    data = scaler.transform(data)
-    prediction = model.predict(data)
-    return float(prediction[0])
+# Load model once (global)
+with open(model_path, "rb") as f:
+    model = pickle.load(f)
+
+
+# -------------------------------
+# Prediction Function
+# -------------------------------
+def predict_output(input_data: dict):
+    """
+    input_data: dictionary coming from API (JSON)
+    Example:
+    {
+        "feature1": value1,
+        "feature2": value2,
+        ...
+    }
+    """
+
+    try:
+        # Convert dict → ordered list (IMPORTANT: match training order)
+        features = list(input_data.values())
+
+        # Convert to numpy array & reshape for model
+        final_input = np.array(features).reshape(1, -1)
+
+        # Prediction
+        prediction = model.predict(final_input)
+
+        # If classification → return label
+        return {
+            "prediction": prediction[0]
+        }
+
+    except Exception as e:
+        return {
+            "error": str(e)
+        }
