@@ -31,7 +31,7 @@ features = [
 
 if st.button("Predict"):
     response = requests.post(
-        "http://127.0.0.1:10000/predict",
+        "https://heart-disease-api-wqg9.onrender.com/predict",
         json={"features": features}
     )
 

@@ -1,14 +1,20 @@
 import pickle
 import numpy as np
 from flask import Flask, request, jsonify
+import os
 
 app = Flask(__name__)
 
-import os
-
+# Load model
 model_path = os.path.join(os.path.dirname(__file__), '..', 'model', 'model.pkl')
 model = pickle.load(open(model_path, 'rb'))
 
+# NEW (optional but recommended)
+@app.route('/')
+def home():
+    return "Heart Disease API is running!"
+
+# Prediction route
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.json['features']
